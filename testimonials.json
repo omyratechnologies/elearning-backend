@@ -1,0 +1,27 @@
+[
+    {
+        "name": "Siddu Siddharth Rai",
+        "whatTheySay": "best Elearning platform to learn new things, I learned Ethical Hacking the course instrurctor is very good",
+        "course": "Ethical Hacking"
+    },
+    {
+        "name": "Rahul Kumar",
+        "whatTheySay": "I learned Python from this platform, the course instructor is very good and the course is very well structured",
+        "course": "Python"
+    },
+    {
+        "name": "Rajesh Kumar",
+        "whatTheySay": "I am Rajesh Kumar, I take the course of OpenShift from this platform, the course instructor is very good and the course is very well structured",
+        "course": "OpenShift"
+    },
+    {
+        "name": "Rahul Kumar",
+        "whatTheySay": "The Python course is very good, the course I learned so many things from this course",
+        "course": "Python"
+    },
+    {
+        "name": "Jyothi",
+        "whatTheySay": "I love the course of Ethical Hacking, the course instructor is very professional and he as good practical knowledge",
+        "course": "Ethical Hacking"
+    }
+]

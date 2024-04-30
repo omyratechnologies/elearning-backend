@@ -1,9 +1,14 @@
 // Database configuration
 const mongoose = require('mongoose');
+const dotenv = require('dotenv');
+
+dotenv.config();
+
+const uri = process.env.MONGODB_URI;
 
 const connectDB = async () => {
     try {
-        await mongoose.connect('mongodb+srv://avinash:uy99XDUsY56mKiDo@csa.6qiml1r.mongodb.net/elearning?retryWrites=true&w=majority&appName=CSA');
+        await mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true });
         console.log('MongoDB connected');
     } catch (err) {
         console.error('Error connecting to MongoDB:', err);

@@ -7,6 +7,7 @@ const courseRoutes = require('./routes/courseRouter');
 const blogRoutes = require('./routes/blogRouter');
 const testimonialRouter = require('./routes/testimonialRouter');
 const commentRouter = require('./routes/commentRouter');
+const userRouter = require('./routes/userRouter');
 
 const app = express();
 
@@ -30,7 +31,7 @@ app.use('/courses', courseRoutes);
 app.use('/blogs', blogRoutes);
 app.use('/testimonials', testimonialRouter); 
 app.use('/comments', commentRouter);
-
+app.use('/user', userRouter);
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);

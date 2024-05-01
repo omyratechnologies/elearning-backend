@@ -12,24 +12,24 @@ router.post('/register', verifyApiKey, userController.registerUser);
 router.post('/login', verifyApiKey, userController.loginUser);
 
 // Route to get all users with API key verification
-router.get('/', verifyApiKey, userController.getAllUsers);
+// router.get('/', verifyApiKey, userController.getAllUsers);
 
 // Route to get a user by ID with API key verification
-router.get('/id/:userId', verifyApiKey, userController.getUserById);
+// router.get('/id/:userId', verifyApiKey, userController.getUserById);
 
 // Route to update a user by ID with API key verification
-router.put('/id/:userId', verifyApiKey, userController.updateUser);
+// router.put('/id/:userId', verifyApiKey, userController.updateUser);
 
 // Route to delete a user by ID with API key verification
-router.delete('/id/:userId', verifyApiKey, userController.deleteUser);
+// router.delete('/id/:userId', verifyApiKey, userController.deleteUser);
 
 // Route to get all posts by a user with API key verification
-router.get('/id/:userId/posts', verifyApiKey, userController.getPostsByUserId);
+// router.get('/id/:userId/posts', verifyApiKey, userController.getPostsByUserId);
 
 // Route to get all comments by a user with API key verification
-router.get('/id/:userId/comments', verifyApiKey, userController.getCommentsByUserId);
+// router.get('/id/:userId/comments', verifyApiKey, userController.getCommentsByUserId);
 
 // Route to get all testimonials by a user with API key verification
-router.get('/id/:userId/testimonials', verifyApiKey, userController.getTestimonialsByUserId);
+// router.get('/id/:userId/testimonials', verifyApiKey, userController.getTestimonialsByUserId);
 
 module.exports = router;

@@ -1,5 +1,7 @@
 const User = require('../models/user');
 const zod = require("zod");
+const jwt = require("jsonwebtoken");
+
 const signupSchema = zod.object({
     name : zod.string(),
     password : zod.string(),
@@ -56,7 +58,7 @@ exports.loginUser =  async(req,res) => {
     const{success} = signinSchema.safeParse(req.body)
     if (!success) {
         return res.status(411).json({
-            message: "Email already taken / Incorrect inputs"
+            message: "Email already exist"
         })
     }
 
@@ -75,7 +77,7 @@ exports.loginUser =  async(req,res) => {
         })
     } catch (e) {
         res.status(400).json({
-            msg: "Email doesn't exist/ Incorrect inputs"
+            msg: "Wrong password!"
         })
     }
 }

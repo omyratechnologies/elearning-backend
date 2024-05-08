@@ -12,9 +12,9 @@ module.exports = function validateRegister2Input(data){
     }else if (!Validator.isEmail(data.email)) {
         errors.message = "Email is invaild";
     }
-    if (Validator.isEmpty(data.password)){
-        errors.message = "Password field is required";
-    }
+    // if (Validator.isEmpty(data.password)){
+    //     errors.message = "Password field is required";
+    // }
 
     return {
         errors,

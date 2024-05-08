@@ -7,7 +7,6 @@ const userSchema = new mongoose.Schema({
     },
     name: {
         type: String,
-        required: true
     },
     email: {
         type: String,
@@ -16,17 +15,18 @@ const userSchema = new mongoose.Schema({
     },
     password: {
         type: String,
-        required: true
     },
     phoneNumber: {
         type: String,
-        required: true
     },
     role: {
         type: String,
         enum: ['student', 'instructor'],
         default: 'student'
-    }
+    },
+    token: {
+        type: String,
+    },
 });
 
 // courseId auto-increment

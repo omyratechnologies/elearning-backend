@@ -17,44 +17,66 @@ const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 
 /// Inserting SignUp 
-exports.signUp =(req, res) => {
+exports.signUp = (req, res) => {
+    const { errors, isValid } = validateRegisterInput(req.body);
 
-    //Form vaildation
-    const { errors, isValid } = validateRegisterInput(req.body)
-
-    ///check vaildation
-
-    if(!isValid) {
-        return res.status(400).json(errors)
+    if (!isValid) {
+        return res.status(400).json(errors);
     }
 
-    User.findOne({ email: req.body.email }).then(returnedStuff => {
-        if(returnedStuff) {
-            return res.status(400).json({email: "Email already exist!!!"})
+    crypto.randomBytes(32, (err, buffer) => {
+        if (err) {
+            console.log('Error generating random bytes:', err);
+            return res.status(500).json({ message: 'An error occurred while generating token' });
         }
-    });
 
-    // saving user with request information to database
-	const { name, email, phoneNumber, role ,password } = req.body;
+        const token = buffer.toString('hex');
+        const { email, role } = req.body;
 
-	const signupUser = new User({
-		name : name,
-        email : email,
-        phoneNumber : phoneNumber,
-		password : password,
-		role:role,
-		// selectedFile : selectedFile,
-	});
+        const transporter = nodemailer.createTransport({
+            service: 'smtp.gmail.com',
+            port: 587,
+            secure: false,
+            auth: {
+                user: 'nonamermc5555@gmail.com',
+                pass: 'cfxv peyc wceu hjkq',
+            },
+        });
 
-    bcrypt.genSalt(10, (err, salt) =>{
-        bcrypt.hash(signupUser.password, salt, (err, hash) => {
-            if(err) throw err;
-            signupUser.password = hash;
-            signupUser.save().then(User => res.json(User)).catch(err => console.log(err));
+        const mailOptions = {
+            from: 'avinash@solvency.in',
+            to: req.body.email,
+            subject: 'Password reset',
+            text: `Please click on the following link to verify your account: href="http://localhost:3000/user/setpassword/${token}`,
+            html: `<a href="http://localhost:3000/user/setpassword/${token}">Create Password</a>`,
+        };
+
+        transporter.sendMail(mailOptions, function (error, info) {
+            if (error) {
+                console.error('Error sending email:', error);
+                return res.status(500).json({ message: 'An error occurred while sending the email' });
+            } else {
+                console.log('Email sent:', info.response);
+
+                const newUser = new User({
+                    email: email,
+                    role: role,
+                    token: token,
+                });
+
+                newUser.save()
+                    .then((result) => {
+                        return res.json({ message: 'Check your email and follow the instructions' });
+                    })
+                    .catch((error) => {
+                        console.error('Error saving user to database:', error);
+                        return res.status(500).json({ message: 'An error occurred while saving the user to the database' });
+                    });
+            }
         });
     });
-
 };
+
 
 
 exports.login =(req, res) => {
@@ -221,3 +243,4 @@ exports.resetpassword = (req,res)=>{
         console.log(err)
     })
 }
+

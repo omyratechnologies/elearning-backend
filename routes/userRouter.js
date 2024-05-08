@@ -6,10 +6,16 @@ const { verifyApiKey } = require('../Middlewares/apiKeyMiddleware');
 
 
 // Route to register a new user with API key verification
-router.post('/register', verifyApiKey, userController.registerUser);
+router.post('/register', verifyApiKey, userController.signUp);
 
 // Route to login a user with API key verification
-router.post('/login', verifyApiKey, userController.loginUser);
+router.post('/login', verifyApiKey, userController.login);
+
+// Route to goolge login a user with API key verification
+router.post('/googlelogin', verifyApiKey, userController.googlelogin);
+
+// Route to forgot password a user with API key verification
+router.post('/forgotpassword', verifyApiKey, userController.forgotPassword);
 
 // Route to get all users with API key verification
 // router.get('/', verifyApiKey, userController.getAllUsers);

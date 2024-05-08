@@ -1,105 +1,92 @@
 // userController.js
 
 const User = require('../models/user');
+const zod = require("zod");
+const jwt = require("jsonwebtoken");
 
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const keys = require('../config/keys');
+const signupSchema = zod.object({
+    name : zod.string(),
+    password : zod.string(),
+    email : zod.string().email(),
+    role : zod.string(),
 
-const validateRegisterInput = require('../validation/userRegister');
-const validateLoginInput = require('../validation/login');
-const validateRestPassword = require('../validation/resetPassword');
 
-const {OAuth2Client} = require('google-auth-library');
-const client = new OAuth2Client("333871753988-13vgtkfsrd47gg9vtnui983f8stk01lr.apps.googleusercontent.com")
+})
 
-const nodemailer = require('nodemailer');
-const crypto = require('crypto');
-
-/// Inserting SignUp 
-exports.signUp =(req, res) => {
-
-    //Form vaildation
-    const { errors, isValid } = validateRegisterInput(req.body)
-
-    ///check vaildation
-
-    if(!isValid) {
-        return res.status(400).json(errors)
+exports.registerUser = async (req, res) => {
+    const { success } = signupSchema.safeParse(req.body)
+    if (!success) {
+        return res.status(411).json({
+            message: "Email already taken /  Incorrect inputs"
+        })
     }
 
-    User.findOne({ email: req.body.email }).then(returnedStuff => {
-        if(returnedStuff) {
-            return res.status(400).json({email: "Email already exist!!!"})
-        }
-    });
+    const existingUser = await User.findOne({
 
-    // saving user with request information to database
-	const { name, email, phoneNumber, role ,password } = req.body;
+        email : req.body.email
 
-	const signupUser = new User({
-		name : name,
-        email : email,
-        phoneNumber : phoneNumber,
-		password : password,
-		role:role,
-		// selectedFile : selectedFile,
-	});
+    })
 
-    bcrypt.genSalt(10, (err, salt) =>{
-        bcrypt.hash(signupUser.password, salt, (err, hash) => {
-            if(err) throw err;
-            signupUser.password = hash;
-            signupUser.save().then(User => res.json(User)).catch(err => console.log(err));
-        });
-    });
-
-};
-
-
-exports.login =(req, res) => {
-
-    //what happens
-    const {errors, isValid} = validateLoginInput(req.body)
-    if (!isValid) {
-        return res.status(400).json(errors)
+    if (existingUser) {
+        return res.status(411).json({
+            msg: "Email already taken / Incorrect inputs"
+        })
     }
-    const email = req.body.email;
-    const password = req.body.password;
 
-    User.findOne({ email: email }).then(User => {
+    const userData = await User.create({
+        name: req.body.name,
+        email: req.body.email,
+        password: req.body.password,
+        role: req.body.role,
+    })
 
-        //check if user exists
-        if(!User){
-            return res.status(404).json({message: "Email not found"});
-        }
+    const userId = userData._id;
 
-        //check password
-        bcrypt.compare(password, User.password).then(isMatch => {
-            if(isMatch){
-                //user matched
-                //create JWT payload
+    const token = jwt.sign({
+        userId, name: userData.name
+    }, process.env.JWT_SECRET)
 
-                const payload ={ id: User.userId, name: User.name, email: User.email, phone: User.phoneNumber, role: User.role};
+    res.json({
+        msg: "User created successfully",
+        token: token
+    })
+}
+const signinSchema = zod.object({
+    email : zod.string().email(),
+    password : zod.string(),
 
-                //sign token
-                jwt.sign(
-                    payload,
-                    keys.secretOrKey2,
-                    {expiresIn: 3600},
-                    (err, token) => {
-                    res.json({ success: true, token: "Bearer" + token, payload});
-                });
+})
+exports.loginUser =  async(req,res) => {
+    const{success} = signinSchema.safeParse(req.body)
+    if (!success) {
+        return res.status(411).json({
+            message: "Email already exist"
+        })
+    }
 
-                
-            } else {
-                return res
-                .status(400)
-                .json({ message: "Password Incorrect"})
-            }
-        });
-    });
-};
+    try {
+
+        const user = await User.findOne({
+            email: req.body.email,
+            password: req.body.password
+        })
+
+        const token = jwt.sign({ userId: user._id, name: user.name }, process.env.JWT_SECRET)
+
+        res.json({
+            msg: "User Signin Successfull",
+            token
+        })
+    } catch (e) {
+        res.status(400).json({
+            msg: "Wrong password!"
+        })
+    }
+}
+
+
+// console.log(User);
+
 
 exports.googlelogin = (req, res) => {
     const {tokenId} = req.body;
@@ -107,7 +94,7 @@ exports.googlelogin = (req, res) => {
     .then(response => {
         const {email_verified, name, email} = response.payload;
         if (email_verified){
-            User.findOne({email}).exec((err, user) => {
+            patient.findOne({email}).exec((err, user) => {
                 if (err){
                     return res.status(400).json({
                         error:"Something Went wrong"
@@ -123,7 +110,7 @@ exports.googlelogin = (req, res) => {
                         })
                     }else{
                         let password = email+keys.secretOrKey2;
-                        let newUser = new User({name, email, password});
+                        let newUser = new patient({name, email, password});
                         newUser.save((err,data) => {
                             if (err){
                                 return res.status(400).json({
@@ -154,7 +141,7 @@ exports.forgotPassword = async (req, res) => {
             console.log(err)
         }
         const token = buffer.toString("hex")
-        User.findOne({email:req.body.email})
+        patient.findOne({email:req.body.email})
         .then(user=>{
             if(!user){
                 return res.status(422).json({error:"User dont exists with that email"})
@@ -171,7 +158,7 @@ exports.forgotPassword = async (req, res) => {
                     });
                     var mailOptions = {
                     to: req.body.email,
-                    from:"bingoboom1438@gmail.com",
+                    from:"docbot@gmail.com",
                     subject:"password reset",
                     html:`
                     <h2>'You are receiving this because you (or someone else) have requested the reset of the password for your account.</br> Please click on the following link, or paste this into your browser to complete the process'</h2>
@@ -202,7 +189,7 @@ exports.resetpassword = (req,res)=>{
     
     const newPassword = req.body.password
     const sentToken = req.body.token
-    User.findOne({resetToken:sentToken,expireToken:{$gt:Date.now()}})
+    patient.findOne({resetToken:sentToken,expireToken:{$gt:Date.now()}})
     .then(user=>{
         if(!user){
             return res.status(422).json({error:"Try again session expired"})
@@ -221,3 +208,7 @@ exports.resetpassword = (req,res)=>{
         console.log(err)
     })
 }
+
+
+
+
